@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>
+  // Opened inside LINE's built-in browser? Ask LINE to hand the page to Safari instead
+  // (LINE opens any link carrying openExternalBrowser=1 in the phone's normal browser).
+  (() => {
+    const u = new URL(location.href);
+    if (/\bLine\//i.test(navigator.userAgent) && !u.searchParams.has('openExternalBrowser')) {
+      u.searchParams.set('openExternalBrowser', '1');
+      location.replace(u.href);
+    }
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="For PangJung">
+<meta name="theme-color" content="#F7E6E3">
+<meta property="og:title" content="For PangJung">
+<meta property="og:description" content="A letter, just for you.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://siradevv.github.io/for-pangjung/">
+<meta property="og:image" content="https://siradevv.github.io/for-pangjung/preview.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<title>For PangJung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Pinyon+Script&family=Mali:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blush:#F7E6E3; --blush-2:#F1D6D2; --paper:#FFFAF6; --line:#E6CBC6;
+  --wine:#5B1F27; --wine-soft:#7A3A40; --seal:#A8323E; --muted:#9A6B6E;
+  --serif:"Cormorant Garamond","Mali",Georgia,serif; --script:"Pinyon Script","Mali",cursive;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--blush)}
+body{font-family:var(--serif);color:var(--wine);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;overflow:hidden;overscroll-behavior:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-action:manipulation}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+
+/* progress */
+.progress{display:flex;gap:6px;width:min(560px,86vw);margin:26px auto 0;transition:opacity .6s}
+.progress i{flex:1;height:3px;border-radius:2px;background:var(--blush-2);transition:background .6s}
+.progress i.on{background:var(--seal)}
+.progress.hide{opacity:0}
+
+/* pages */
+.pages{position:relative;flex:1}
+.page{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 28px 40px;text-align:center;opacity:0;visibility:hidden;transform:translateY(14px);transition:opacity .8s ease,transform .8s ease,visibility 0s linear .8s}
+.page.active{opacity:1;visibility:visible;transform:none;transition:opacity .8s ease .15s,transform .8s ease .15s}
+.kicker{font-size:15px;letter-spacing:.32em;text-transform:uppercase;color:var(--muted)}
+h1{font-weight:500;font-style:italic;font-size:clamp(40px,7vw,56px);line-height:1.05;margin-top:8px}
+h2{font-weight:500;font-style:italic;font-size:clamp(32px,5.6vw,42px);line-height:1.1;margin-top:6px}
+h1,h2,.instruction,.card .cap{text-wrap:balance}
+.instruction{font-size:21px;color:var(--wine-soft);margin-top:14px;font-style:italic}
+.btn{margin-top:30px;min-width:200px;padding:16px 34px;border-radius:999px;background:var(--wine);color:var(--paper);font-size:19px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;transition:transform .2s,opacity .5s,background .3s}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--wine);border:1px solid var(--line)}
+.btn[disabled]{opacity:.35;pointer-events:none}
+
+/* envelope */
+.env-wrap{perspective:1100px;margin-top:30px}
+.envelope{position:relative;width:min(380px,78vw);aspect-ratio:3/2;background:var(--paper);border:1px solid var(--line);box-shadow:0 24px 50px rgba(91,31,39,.12)}
+.envelope .back{position:absolute;inset:0;background:linear-gradient(to top right,transparent 49.6%,var(--line) 50%,transparent 50.4%),linear-gradient(to top left,transparent 49.6%,var(--line) 50%,transparent 50.4%)}
+.envelope .flap{position:absolute;left:-1px;right:-1px;top:-1px;height:62%;transform-origin:50% 0;transition:transform 1s cubic-bezier(.5,0,.3,1);z-index:3}
+.envelope .flap svg{width:100%;height:100%;display:block;overflow:visible}
+.envelope .letter{position:absolute;left:7%;right:7%;bottom:6%;height:86%;background:#fff;border:1px solid var(--line);z-index:1;transition:transform 1.1s cubic-bezier(.3,.8,.3,1) .7s;display:flex;align-items:flex-start;justify-content:center;padding-top:16px}
+.envelope .letter span{font-family:var(--script);font-size:28px;color:var(--wine-soft)}
+.envelope .front{position:absolute;inset:0;z-index:2;pointer-events:none}
+.envelope .front svg{width:100%;height:100%;display:block}
+.seal{position:absolute;left:50%;top:62%;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;background:var(--seal);z-index:4;display:flex;align-items:center;justify-content:center;color:#F8DCD8;font:italic 500 27px var(--serif);letter-spacing:.02em;box-shadow:0 6px 14px rgba(91,31,39,.3),inset 0 0 0 5px rgba(255,255,255,.08),inset 0 0 0 10px rgba(0,0,0,.06);transition:transform .5s cubic-bezier(.3,1.6,.5,1),opacity .5s}
+.seal.pulse{animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.seal i{font-size:.62em;margin:0 1px;opacity:.85}
+.anniv-date{margin-top:10px;font-size:19px;letter-spacing:.14em;color:var(--muted)}
+.envelope.open .seal{transform:scale(1.4);opacity:0;animation:none}
+.envelope.open .flap{transform:rotateX(180deg);z-index:0}
+.envelope.open .letter{transform:translateY(-58%)}
+.answer-box{margin-top:26px;width:min(420px,84vw);transition:opacity .5s}
+.answer-box label{display:block;font-size:20px;font-style:italic;color:var(--wine-soft)}
+.answer-row{display:flex;gap:10px;margin-top:12px}
+.answer-row input{flex:1;min-width:0;font:500 22px var(--serif);color:var(--wine);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:13px 22px;outline:none;-webkit-user-select:text;user-select:text;-webkit-appearance:none}
+.answer-row input:focus{border-color:var(--seal)}
+.answer-row .btn{margin:0;min-width:0;padding:13px 24px;font-size:16px}
+.reply{min-height:28px;margin-top:12px;font-size:19px;font-style:italic;color:var(--seal)}
+.shake{animation:shake .45s}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(2px)}}
+
+/* letter page */
+.sheet{width:min(560px,88vw);max-height:68vh;overflow:auto;background:var(--paper);border:1px solid var(--line);padding:40px 42px;text-align:left;box-shadow:0 24px 50px rgba(91,31,39,.1);-webkit-overflow-scrolling:touch}
+.sheet .to{font-family:var(--script);font-size:38px;color:var(--wine)}
+.sheet p{font-size:22px;line-height:1.55;margin-top:14px;color:#4a2228}
+.sheet p.th{font-size:20px;line-height:1.85}
+.nw{white-space:nowrap}
+.sheet .sign{font-family:var(--script);font-size:34px;text-align:right;margin-top:18px}
+
+/* story — polaroid scrapbook */
+.story{--cw:min(420px,80vw);flex:1 1 0;min-height:0;display:flex;align-items:center;gap:28px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;width:100vw;padding:34px calc(50vw - var(--cw) / 2) 30px;margin-top:6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.story::-webkit-scrollbar{display:none}
+.card{position:relative;flex:none;width:var(--cw);margin:0;scroll-snap-align:center;background:#fff;padding:14px 14px 18px;border:1px solid #EFE3DF;box-shadow:0 16px 34px rgba(91,31,39,.11);transform:rotate(var(--r,0deg));text-align:left}
+.card::before{content:'';position:absolute;top:-13px;left:50%;width:96px;height:26px;margin-left:-48px;background:rgba(236,201,194,.72);transform:rotate(var(--t,-3deg));box-shadow:0 1px 2px rgba(91,31,39,.08)}
+.card .ph{position:relative;aspect-ratio:4/5;background:var(--blush-2);overflow:hidden}
+.card.wide .ph{aspect-ratio:4/3}
+.card .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.stamp{position:absolute;right:9px;bottom:8px;font:600 clamp(9px,calc(var(--cw) * .026),11px)/1 ui-monospace,Menlo,monospace;letter-spacing:.1em;color:#FF9D45;text-shadow:0 0 5px rgba(255,110,20,.75),0 0 1px #FFD9A8}
+.card .day{font-size:13px;letter-spacing:.26em;text-transform:uppercase;color:var(--muted);margin-top:14px}
+.card .cap{font-size:clamp(16px,calc(var(--cw) * .058),23px);font-style:italic;margin-top:4px;line-height:1.3;color:var(--wine)}
+.card.blank .ph{background:repeating-linear-gradient(135deg,#FBF3F0 0 10px,#F7ECE8 10px 20px);display:grid;place-items:center;text-align:center;border:1px dashed var(--line)}
+.card.blank .ph span{font-family:var(--script);font-size:38px;line-height:1.15;color:var(--wine-soft)}
+.card.blank .ph small{display:block;font:italic 18px var(--serif);color:var(--muted);margin-top:8px}
+.editing [data-field]{-webkit-user-select:text;user-select:text;outline:1px dashed var(--line);outline-offset:3px;border-radius:2px;cursor:text;min-height:1.2em}
+.editing [data-field]:focus{outline:2px solid var(--seal);background:#FFF6F3}
+.edit-bar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:60;background:var(--wine);color:var(--paper);font-size:16px;letter-spacing:.04em;padding:10px 20px;border-radius:999px;box-shadow:0 8px 20px rgba(91,31,39,.25);white-space:nowrap}
+.edit-bar b{font-weight:600;color:#F8DCD8}
+.editing #p-story{padding-bottom:78px}
+/* short screens (landscape, small windows): tighten the header so the photos get the room */
+@media (max-height:860px){#p-story h2{font-size:34px}#p-story .instruction{font-size:18px;margin-top:6px}#p-story .btn{margin-top:12px;padding:13px 32px}#p-story .story{padding-top:28px;padding-bottom:20px}}
+@media (max-height:720px){#p-story .kicker{display:none}#p-story h2{font-size:30px;margin-top:0}#p-story .story{padding-top:24px;padding-bottom:14px}}
+@media (max-height:560px){#p-story .instruction{display:none}}
+.story-count{font-size:17px;font-style:italic;color:var(--muted);letter-spacing:.06em}
+
+
+
+/* yes / no */
+.arena{position:relative;width:min(560px,90vw);height:clamp(300px,42vh,440px);margin-top:20px}
+.yn{position:absolute;top:50%;padding:16px 38px;border-radius:999px;font-size:21px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;touch-action:none;transform:translate(-50%,-50%) scale(var(--s,1));transition:left .3s ease,top .3s ease,transform .35s ease,opacity .5s}
+#yes{left:calc(50% - 80px);background:var(--seal);color:var(--paper);box-shadow:0 10px 22px rgba(168,50,62,.3)}
+#no{left:calc(50% + 80px);background:var(--paper);border:1px solid var(--line)}
+
+/* gift */
+.ticket-wrap{perspective:1200px;margin-top:26px}
+.ticket{position:relative;display:grid;width:clamp(260px,calc((100dvh - 300px) * .83),min(440px,84vw));aspect-ratio:5/6;transform-style:preserve-3d;transition:transform 1.2s cubic-bezier(.4,1.2,.4,1)}
+.ticket.flip{transform:rotateY(180deg)}
+.ticket.flip .face.front{pointer-events:none}   /* once flipped, taps go to the back (Add to calendar) */
+.face{grid-area:1/1;position:relative;-webkit-backface-visibility:hidden;backface-visibility:hidden;border:1px solid var(--line);background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px;box-shadow:0 24px 50px rgba(91,31,39,.14)}
+.face.front{background:var(--wine);color:#FBEFE6;border-color:var(--wine);box-shadow:0 24px 50px rgba(91,31,39,.14),inset 0 0 0 12px var(--wine),inset 0 0 0 13px rgba(226,196,152,.5)}
+.face.front .kicker{color:#E2C498}
+.face.front .big{font-family:var(--script);font-size:54px;line-height:1.1;color:#FBEFE6}
+.face.back{transform:rotateY(180deg);--ink:#3B2326;--taupe:#8E716D;--label:#B3928E;--rule:#EFDCD7}
+.face.back > .kicker{color:var(--seal)}
+.face.back .rest{font-size:clamp(30px,5vw,38px);font-style:italic;font-weight:500;margin-top:8px;line-height:1.15;color:#4A1820}
+.face.back dl{margin-top:22px;width:100%;border-top:1px solid var(--rule)}
+.face.back dl div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--rule);font-size:20px}
+.face.back dd{text-align:right;color:var(--ink)}
+.face.back dt{letter-spacing:.2em;text-transform:uppercase;font-size:12px;color:var(--label);align-self:center}
+.face.back .ps{font-family:var(--script);font-size:30px;margin-top:20px;color:var(--seal)}
+.face.back .sub{font-size:18px;font-style:italic;color:var(--taupe);margin-top:4px}
+.face.back .cal{display:inline-flex;align-items:center;gap:8px;min-height:42px;margin-top:14px;padding:0 20px;border-radius:999px;border:1px solid rgba(142,113,109,.35);background:transparent;color:var(--taupe);font-size:13px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;-webkit-tap-highlight-color:transparent;transition:transform .15s,background .2s}
+.face.back .cal svg{width:16px;height:16px;opacity:.8}
+.face.back .cal:active{transform:scale(.96);background:var(--blush)}
+.again{margin-top:22px;font-size:17px;font-style:italic;color:var(--muted);text-decoration:underline;text-underline-offset:4px;opacity:0;pointer-events:none;transition:opacity .8s .6s}
+.again.show{opacity:1;pointer-events:auto}
+/* sideways / short screens: a wider, shorter invitation */
+@media (orientation:landscape) and (max-height:820px){
+  .ticket{width:min(600px,78vw);aspect-ratio:7/4}
+  .ticket-wrap{margin-top:16px}
+  .face{padding:20px 36px}
+  .face.back .rest{font-size:28px;margin-top:4px}
+  .face.back dl{margin-top:12px}
+  .face.back dl div{padding:7px 0;font-size:18px}
+  .face.back .ps{font-size:26px;margin-top:10px}
+}
+
+/* music */
+.music{position:fixed;top:calc(env(safe-area-inset-top) + 14px);right:16px;width:46px;height:46px;border-radius:50%;background:var(--paper);border:1px solid var(--line);display:grid;place-items:center;z-index:40;opacity:0;pointer-events:none;transition:opacity .6s}
+.music.show{opacity:1;pointer-events:auto}
+.music svg{width:22px;height:22px}
+.music .off{display:none}.music.muted .on{display:none}.music.muted .off{display:block}
+
+/* hearts */
+.heart{position:fixed;bottom:-40px;pointer-events:none;color:var(--seal);z-index:50;animation:float 3.2s ease-in forwards}
+@keyframes float{to{transform:translateY(-110vh) rotate(var(--r));opacity:0}}
+@media (prefers-reduced-motion:reduce){.seal.pulse{animation:none}.heart{display:none}}
+</style>
+</head>
+<body>
+<audio id="song" loop playsinline preload="auto"></audio>
+<button class="music" id="music" aria-label="Music on or off">
+  <svg class="on" viewBox="0 0 24 24" fill="none" stroke="#5B1F27" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
+  <svg class="off" viewBox="0 0 24 24" fill="none" stroke="#5B1F27" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/><path d="M3 3l18 18"/></svg>
+</button>
+<div id="app">
+  <div class="progress hide" id="progress"></div>
+  <div class="pages">
+
+
+    
+    <section class="page" id="p-envelope">
+      <div class="kicker">Happy anniversary</div>
+      <h1 id="toName">For PangJung</h1>
+      <div class="anniv-date" id="annivDate">30 November 2026</div>
+      <div class="env-wrap">
+        <div class="envelope" id="envelope">
+          <div class="back"></div>
+          <div class="letter"><span>My love…</span></div>
+          <div class="front"><svg viewBox="0 0 300 200" preserveAspectRatio="none"><path d="M0 200 L150 112 L300 200 Z M0 0 L0 200 L120 104 Z M300 0 L300 200 L180 104 Z" fill="#FFFAF6" stroke="#E6CBC6" stroke-width="1" vector-effect="non-scaling-stroke"/></svg></div>
+          <div class="flap"><svg viewBox="0 0 300 124" preserveAspectRatio="none"><path d="M0 0 L300 0 L150 124 Z" fill="#FBF1EC" stroke="#E6CBC6" stroke-width="1" vector-effect="non-scaling-stroke"/></svg></div>
+          <div class="seal pulse" id="seal">P<i>&amp;</i>N</div>
+        </div>
+      </div>
+      <form class="answer-box" id="lockForm" autocomplete="off" novalidate>
+        <label for="answer" id="question"></label>
+        <div class="answer-row">
+          <input id="answer" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Your answer" enterkeyhint="done">
+          <button class="btn" type="submit">Open</button>
+        </div>
+        <p class="reply" id="reply" aria-live="polite"></p>
+      </form>
+    </section>
+
+    
+    <section class="page" id="p-letter">
+      <div class="sheet" id="letterSheet"></div>
+      <button class="btn" data-next>Continue</button>
+    </section>
+
+    
+    <section class="page" id="p-story">
+      <div class="kicker">2024 – 2026</div>
+      <h2>Our story so far</h2>
+      <p class="instruction">Swipe through two years of us</p>
+      <div class="story" id="story"></div>
+      <div class="story-count" id="storyCount"></div>
+      <button class="btn" data-next>Continue</button>
+    </section>
+
+
+
+    
+    <section class="page" id="p-ask">
+      <h2 id="askText"></h2>
+      <div class="arena" id="arena">
+        <button class="yn" id="yes">Yes</button>
+        <button class="yn" id="no">No</button>
+      </div>
+    </section>
+
+    
+    <section class="page" id="p-gift">
+      <div class="kicker">Your anniversary gift</div>
+      <p class="instruction" id="giftHint">Tap the card to turn it over</p>
+      <div class="ticket-wrap">
+        <div class="ticket" id="ticket" role="button" aria-label="Turn the card over">
+          <div class="face front"><div class="kicker">An invitation</div><div class="big">Dinner<br>with me</div></div>
+          <div class="face back" id="giftBack"></div>
+        </div>
+      </div>
+      <button class="again" id="again">Read it again</button>
+    </section>
+
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   All the personal content — edit here.
+   ========================================================= */
+const CONFIG = {"name":"PangJung","date":"30 November 2026","song":"","question":"To open, answer: where did we first meet?","hints":["Not quite, my love. Try again.","Hint: think back to the very first time you saw me.","Hint: it starts with N…"],"since":"2024-11-30","ask":"Will you go on a date with me?","noLines":["No","Are you sure?","Really sure?","Think again","PangJung, please","I’ll be sad","Okay fine, bye"],"letter":[],"gift":{}};
+const LOCK = {"salt":"+O8TTy+EfAZ+vgLu0cZlhw==","iter":250000,"slots":["JHYgygT9FuQ2bw1i7Q7giOpx6PQiHswm0OmYgejtlepINW2AWPArVUq5TkU2ln8flU6OHbBYiPM8NwiD","pSqc5YVMf6WO2vzqJWIg2rBXRtzvX4EaYEKDNLhaDqVejiKMVSMZpG9kL0S5ZXyUFhCMgxp/aZS+TJnS","XMncDNCkhvERCFljA1h3FzjprAfpRYiYL+NRA2pnsEBKR94v98UmqtwSBKtLss6umJ24Xd2Jt8Uhnsre"],"data":"d.bin","song":"s.bin"};
+
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const norm = s => s.toLowerCase().normalize('NFKC').replace(/[^\p{L}\p{N}]/gu, '');
+const params = new URLSearchParams(location.search);
+const EDIT = false;
+const KEY = 'for-pang-letter-v1';
+const store = { get() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } }, set(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} } };
+if (params.has('reset')) store.set({});
+const saved = store.get();
+
+/* ---------- the lock ----------
+   In the locked copy (made by build.mjs) the letter, photos, song and dinner details are scrambled
+   (AES-GCM). Her answer to the envelope question unlocks them on her phone; nothing private is readable
+   without it. In the normal copy (this folder) everything is plain and LOCK does not exist. */
+const LOCKED = typeof LOCK !== 'undefined';
+const report = err => { if (params.has('debug')) document.querySelector('#reply').textContent = `⚠ ${err && (err.message || err.reason || err)}`; };
+addEventListener('error', e => report(e.error || e.message));
+addEventListener('unhandledrejection', e => report(e.reason));
+if (params.has('debug')) setInterval(() => {   // test link only: show whether the song is really playing
+  let d = document.querySelector('#dbg');
+  if (!d) { d = document.createElement('div'); d.id = 'dbg'; d.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:99;font:12px monospace;background:#fff;padding:4px 6px;border-radius:6px'; document.body.append(d); }
+  d.textContent = `song: ${song.src.startsWith('blob:') ? 'loaded' : 'not loaded'} · ${song.paused ? 'paused' : 'playing'} · ${song.currentTime.toFixed(1)}s · muted ${song.muted}`;
+}, 500);
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const toB64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const fetchBytes = url => fetch(url).then(r => { if (!r.ok) throw new Error(url); return r.arrayBuffer(); });
+let contentKey = null, savedKey = null;
+const scrambled = LOCKED ? { data: fetchBytes(LOCK.data), song: LOCK.song ? fetchBytes(LOCK.song) : null } : null;  // download early; useless without the key
+if (scrambled) Object.values(scrambled).forEach(p => p && p.catch(() => {}));
+async function openBox(bytes) {                    // file layout: [12-byte IV][ciphertext + tag]
+  const u = new Uint8Array(bytes);
+  return crypto.subtle.decrypt({ name: 'AES-GCM', iv: u.slice(0, 12) }, contentKey, u.slice(12));
+}
+async function useKey(raw) { contentKey = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']); }
+async function unlock(answer) {                    // true if her answer opens one of the key slots
+  const pw = await crypto.subtle.importKey('raw', new TextEncoder().encode(norm(answer)), 'PBKDF2', false, ['deriveKey']);
+  const kek = await crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt: b64(LOCK.salt), iterations: LOCK.iter },
+    pw, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+  for (const slot of LOCK.slots) {
+    const u = b64(slot);
+    try {
+      const raw = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: u.slice(0, 12) }, kek, u.slice(12));
+      await useKey(raw); savedKey = toB64(raw); return true;
+    } catch { /* not this slot */ }
+  }
+  return false;
+}
+let revealed = null;
+function revealContent() {                         // unscramble everything once; photos keep arriving in the background
+  return revealed ||= (async () => {
+    scrambled.data = scrambled.data.catch(() => fetchBytes(LOCK.data));   // re-download if the early try failed
+    const data = JSON.parse(new TextDecoder().decode(await openBox(await scrambled.data)));
+    Object.assign(CONFIG, data.config);
+    cards = data.story;
+    renderLetter(); renderGift(); renderStory();
+    if (scrambled.song) {
+      scrambled.song = scrambled.song.catch(() => fetchBytes(LOCK.song));
+      const audio = await openBox(await scrambled.song);
+      song.src = URL.createObjectURL(new Blob([audio], { type: 'audio/mpeg' }));
+      song.muted = false;
+    }
+    cards.forEach(async (c, i) => {
+      if (!c.photo) return;
+      try {
+        c.url = URL.createObjectURL(new Blob([await openBox(await fetchBytes(c.photo))], { type: 'image/jpeg' }));
+        const img = story.querySelector(`.card[data-i="${i}"] img`);
+        if (img) img.src = c.url;
+      } catch { /* leave that polaroid empty rather than break the page */ }
+    });
+  })();
+}
+const photoSrc = c => (LOCKED ? c.url : c.photo);
+
+/* ---------- page flow ---------- */
+const FLOW = ['p-envelope', 'p-letter', 'p-story', 'p-ask', 'p-gift'];
+const progress = $('#progress');
+progress.innerHTML = FLOW.map(() => '<i></i>').join('');
+let current = -1;
+function go(i) {
+  current = i;
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === FLOW[i]));
+  progress.classList.remove('hide');
+  [...progress.children].forEach((d, k) => d.classList.toggle('on', k <= i));
+  if (i > 0 && !EDIT) store.set(savedKey ? { page: i, k: savedKey } : { page: i });
+  onEnter[FLOW[i]] && onEnter[FLOW[i]]();
+}
+document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => go(current + 1)));
+const onEnter = {};
+
+function hearts(n = 18) {
+  for (let i = 0; i < n; i++) {
+    const h = document.createElement('div');
+    h.className = 'heart';
+    h.innerHTML = '<svg width="22" height="20" viewBox="0 0 22 20"><path d="M11 19C3 13 0 9 0 5.5 0 2.5 2.4 0 5.4 0 7.6 0 9.6 1.3 11 3.3 12.4 1.3 14.4 0 16.6 0 19.6 0 22 2.5 22 5.5 22 9 19 13 11 19Z" fill="currentColor"/></svg>';
+    h.style.left = Math.random() * 100 + 'vw';
+    h.style.setProperty('--r', (Math.random() * 60 - 30) + 'deg');
+    h.style.animationDelay = Math.random() * .8 + 's';
+    h.style.transform = `scale(${.7 + Math.random() * .9})`;
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 4200);
+  }
+}
+
+/* ---------- music ---------- */
+const song = $('#song'), musicBtn = $('#music');
+const HAS_SONG = LOCKED ? !!LOCK.song : !!CONFIG.song;
+if (!LOCKED && CONFIG.song) song.src = CONFIG.song;
+song.addEventListener('error', () => musicBtn.classList.remove('show'));   // no file yet: hide the button
+function playSong() { if (!HAS_SONG) return; song.play().then(showMusicButton).catch(() => showMusicButton()); }
+function showMusicButton() { if (HAS_SONG) musicBtn.classList.add('show'); }
+// Locked copy: the song only exists after unlocking, a moment after her tap. iPhone only lets sound start
+// from a tap, so during the tap we briefly play silence on the same player; that unlocks it for the song.
+const SILENCE = 'data:audio/wav;base64,UklGRvQHAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YdAHAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';   // 0.25 s of silence
+let primed = false;
+function primeAudio() {
+  if (!LOCKED || !HAS_SONG || primed) return;
+  primed = true;
+  song.src = SILENCE; song.muted = true;
+  const done = () => { if (song.src === SILENCE) song.pause(); };   // never waited on: iPhone may not report back
+  Promise.resolve(song.play()).then(done, done);
+}
+musicBtn.addEventListener('click', () => {
+  if (song.paused) { song.muted = false; song.play().catch(() => {}); musicBtn.classList.remove('muted'); return; }
+  song.muted = !song.muted; musicBtn.classList.toggle('muted', song.muted);
+});
+
+/* ---------- 1. envelope ---------- */
+$('#toName').textContent = `For ${CONFIG.name}`;
+$('#annivDate').textContent = CONFIG.date;
+$('#question').textContent = CONFIG.question;
+let wrong = 0;
+$('#lockForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const input = $('#answer'), reply = $('#reply'), v = norm(input.value);
+  if (!v) { reply.textContent = 'Type your answer first.'; return; }
+  if (LOCKED && !(window.crypto && crypto.subtle)) {   // unlocking needs a secure (https) page
+    reply.textContent = 'Please open this from the https:// link.'; return;
+  }
+  primeAudio();
+  if (LOCKED) reply.textContent = 'Opening…';
+  let ok;
+  try { ok = LOCKED ? await unlock(input.value) : CONFIG.answers.map(norm).includes(v); }
+  catch (err) { reply.textContent = 'Something went wrong. Please try again.'; report(err); return; }
+  if (!ok) {
+    reply.textContent = CONFIG.hints[Math.min(wrong++, CONFIG.hints.length - 1)];
+    const f = $('#lockForm'); f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake');
+    return;
+  }
+  if (LOCKED) {
+    try { await revealContent(); }
+    catch (err) { revealed = null; reply.textContent = 'Couldn’t load everything. Check your connection and tap Open again.'; report(err); return; }
+  }
+  playSong();
+  input.blur(); window.scrollTo(0, 0);
+  reply.textContent = '';
+  $('#lockForm').style.opacity = 0;
+  $('#envelope').classList.add('open');
+  await wait(2300);
+  go(1);
+});
+
+/* ---------- 2. letter ---------- */
+// keep nicknames and stretched words (น้าาาา) from being split across two lines (Thai has no spaces between words)
+function renderLetter() {
+  const names = (CONFIG.keepTogether || []).concat(`${CONFIG.name}\\w*`).join('|');
+  const keepNames = html => html.replace(new RegExp(`(${names}|น้าา+|[\\u0E00-\\u0E7F]ๆ{2,})`, 'g'), '<span class="nw">$1</span>');
+  $('#letterSheet').innerHTML = `<div class="to">My dearest ${esc(CONFIG.name)},</div>${CONFIG.letter.map(p => `<p${/[\u0E00-\u0E7F]/.test(p) ? ' class="th"' : ''}>${keepNames(esc(p))}</p>`).join('')}<div class="sign">${esc(CONFIG.from)}</div>`;
+}
+
+/* ---------- 3. story ---------- */
+const story = $('#story');
+const DAY = 864e5, since = new Date(CONFIG.since + 'T00:00:00');
+const dayLabel = c => {
+  if (c.label) return c.label;
+  if (!c.date) return '';
+  const n = Math.round((new Date(c.date + 'T00:00:00') - since) / DAY) + 1;
+  return n < 1 ? 'Before us' : `Day ${n}`;
+};
+const filmStamp = d => { const [y, m, dd] = d.split('-'); return `${dd}/${m}/${y.slice(2)}`; };   // dd/mm/yy
+const TILT = [-1.4, 1.1, -0.7, 1.5, -1.1, 0.8];
+let cards = [];
+function renderStory() {
+  story.innerHTML = cards.map((c, i) => {
+    const stamp = c.date ? `<span class="stamp">${filmStamp(c.date)}</span>` : '';
+    const ph = c.blank
+      ? `<span>our next photo<small>goes right here</small></span>${stamp}`
+      : `<img ${photoSrc(c) ? `src="${esc(photoSrc(c))}"` : ''} alt="" loading="${i < 3 ? 'eager' : 'lazy'}" decoding="async">${stamp}`;
+    return `<figure class="card${c.wide ? ' wide' : ''}${c.blank ? ' blank' : ''}" data-i="${i}" style="--r:${TILT[i % TILT.length]}deg;--t:${i % 2 ? 4 : -3}deg">
+      <div class="ph">${ph}</div><div class="txt"><div class="day" data-field="label">${esc(dayLabel(c))}</div><figcaption class="cap" data-field="caption">${esc(c.caption)}</figcaption></div></figure>`;
+  }).join('');
+  if (EDIT) enableEditing();
+  fitCards();
+}
+/* Shrink the polaroids until the tallest one (photo + caption underneath) fits the screen height,
+   so nothing is ever cut off or needs scrolling. Caption text scales down with the card. */
+const GAP = 28;
+const tallest = () => Math.max(...[...story.children].map(c => c.offsetHeight));
+function currentCard() {
+  const mid = story.scrollLeft + story.clientWidth / 2;
+  let best = 0, dist = Infinity;
+  [...story.children].forEach((c, i) => { const d = Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid); if (d < dist) { dist = d; best = i; } });
+  return best;
+}
+function shrinkTo(room, minW) {
+  let w = parseFloat(story.style.getPropertyValue('--cw')) || Math.min(420, innerWidth * 0.8);
+  for (let h = tallest(); h > room && w > minW; h = tallest()) {
+    w = Math.max(minW, Math.floor(w * Math.max(0.7, room / h)) - 2);
+    story.style.setProperty('--cw', `${w}px`);
+  }
+}
+function fitCards() {
+  if (!story.firstElementChild) return;
+  const at = currentCard();
+  story.style.setProperty('--cw', `${Math.min(420, innerWidth * 0.8)}px`);
+  const cs = getComputedStyle(story);
+  const room = story.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 14; // 14px: tilt + shadow
+  shrinkTo(room, 150);
+  // let the first and last card sit in the middle of the screen
+  story.style.paddingLeft = `${Math.max(16, (story.clientWidth - story.firstElementChild.offsetWidth) / 2)}px`;
+  story.style.paddingRight = `${Math.max(16, (story.clientWidth - story.lastElementChild.offsetWidth) / 2)}px`;
+  const c = story.children[at];
+  story.scrollLeft = c.offsetLeft + c.offsetWidth / 2 - story.clientWidth / 2;
+  storyDot();
+}
+let fitTimer;
+addEventListener('resize', () => { clearTimeout(fitTimer); fitTimer = setTimeout(fitCards, 120); });
+document.fonts && document.fonts.ready.then(fitCards);
+function storyDot() {
+  if (!story.firstElementChild) return;
+  $('#storyCount').textContent = `${currentCard() + 1} / ${cards.length}`;
+}
+story.addEventListener('scroll', () => requestAnimationFrame(storyDot), { passive: true });
+onEnter['p-story'] = () => { story.scrollLeft = 0; fitCards(); };
+// load every photo in the background while she reads the letter, so the polaroids never appear blank
+let preloaded = false;
+function preloadPhotos() {
+  if (LOCKED || preloaded || !cards.length) return;   // locked copy: photos are unscrambled straight after unlocking
+  preloaded = true;
+  cards.forEach(c => { if (c.photo) new Image().src = c.photo; });
+}
+onEnter['p-letter'] = preloadPhotos;
+
+/* ---------- 4. the question ---------- */
+$('#askText').textContent = CONFIG.ask;
+const yes = $('#yes'), no = $('#no'), arena = $('#arena');
+let tries = 0;
+// Positions are button centres (the buttons are centred on their left/top via translate(-50%,-50%)).
+function runNo(px, py) {
+  if (no.dataset.gone) return;
+  tries++;
+  const lines = CONFIG.noLines, last = tries >= lines.length - 1;
+  no.textContent = lines[Math.min(tries, lines.length - 1)];
+  const aw = arena.clientWidth, ah = arena.clientHeight;
+  // Yes slides to the middle and grows, but never wider than 75% of the space
+  const s = Math.min(1 + tries * .16, 2, (aw * .75) / yes.offsetWidth);
+  yes.style.left = '50%'; yes.style.setProperty('--s', s);
+  const pad = 16, yw = yes.offsetWidth * s / 2 + pad, yh = yes.offsetHeight * s / 2 + pad;
+  const nw = no.offsetWidth / 2, nh = no.offsetHeight / 2;          // size with the new text
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  let best = null;
+  for (let i = 0; i < 80; i++) {                                      // random spots inside the arena, clear of Yes
+    const x = nw + Math.random() * (aw - 2 * nw), y = nh + Math.random() * (ah - 2 * nh);
+    const clear = Math.abs(x - aw / 2) > yw + nw || Math.abs(y - ah / 2) > yh + nh;
+    if (!clear) continue;
+    const d = Math.hypot(x - px, y - py);
+    if (!best || d > best.d) best = { x, y, d };                     // as far from her finger as possible
+    if (d > 170) break;
+  }
+  const cx = best ? best.x : clamp(no.offsetLeft, nw, aw - nw), cy = best ? best.y : clamp(no.offsetTop, nh, ah - nh);
+  no.style.left = `${cx}px`; no.style.top = `${cy}px`;
+  if (last) { no.dataset.gone = 1; no.style.pointerEvents = 'none'; setTimeout(() => (no.style.opacity = 0), 1100); }
+}
+no.addEventListener('pointerdown', e => { e.preventDefault(); const a = arena.getBoundingClientRect(); runNo(e.clientX - a.left, e.clientY - a.top); });
+no.addEventListener('pointerenter', e => { if (e.pointerType === 'touch') return; const a = arena.getBoundingClientRect(); runNo(e.clientX - a.left, e.clientY - a.top); });
+no.addEventListener('click', e => e.preventDefault());
+// hearts only the first time she says Yes (not again via “Read it again”)
+let celebrated = false;
+yes.addEventListener('click', async () => {
+  if (!celebrated) { celebrated = true; hearts(26); await wait(1600); }
+  go(current + 1);
+});
+// fresh start each visit (she may come back via “Read it again”)
+onEnter['p-ask'] = () => { tries = 0; delete no.dataset.gone; no.removeAttribute('style'); yes.removeAttribute('style'); no.textContent = CONFIG.noLines[0]; };
+
+/* ---------- 5. gift ---------- */
+function renderGift() {
+const g = CONFIG.gift;
+const giftRows = [['When', g.date], ['Time', g.time], ['Wear', g.dress]].filter(([, v]) => v);
+$('#giftBack').innerHTML = `<div class="kicker">Reserved for two</div><div class="rest">${esc(g.title)}</div>${g.subtitle ? `<div class="sub">${esc(g.subtitle)}</div>` : ''}
+  <dl>${giftRows.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl><div class="ps">${esc(g.ps)}</div>
+  ${g.calendar ? `<a class="cal" id="calLink" href="${esc(g.calendar)}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg>Add to calendar</a>` : ''}`;
+// “Add to calendar” opens a real .ics file, so iPhone hands it straight to the Calendar app
+$('#calLink') && $('#calLink').addEventListener('click', e => e.stopPropagation());
+}
+// “Read it again”: back to the letter (music back on if it had stopped)
+$('#again').addEventListener('click', () => { if (song.paused) playSong(); go(FLOW.indexOf('p-letter')); });
+$('#ticket').addEventListener('click', () => {
+  const t = $('#ticket'); if (t.classList.contains('flip')) return;
+  t.classList.add('flip'); $('#giftHint').textContent = 'Happy anniversary, my love.';
+  $('#again').classList.add('show');
+});
+
+/* ---------- edit mode (only for you: open the page with ?edit) ---------- */
+function makeEditable(els, onChange, onBlur) {
+  els.forEach(el => {
+    el.contentEditable = 'plaintext-only';
+    el.spellcheck = true;
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
+    el.addEventListener('input', () => onChange(el));
+    if (onBlur) el.addEventListener('blur', () => onBlur(el));
+  });
+}
+function enableEditing() {
+  makeEditable(story.querySelectorAll('[data-field]'), el => {
+    const c = cards[el.closest('.card').dataset.i], v = el.textContent.trim();
+    if (el.dataset.field === 'label') { if (v) c.label = v; else delete c.label; } else c.caption = v;
+    queueSave('story', cards);
+  }, el => {
+    if (el.dataset.field === 'label') el.textContent = dayLabel(cards[el.closest('.card').dataset.i]);
+    fitCards();
+  });
+}
+const saveTimers = {};
+function queueSave(name, data) {
+  $('#saveState').textContent = 'Saving…';
+  clearTimeout(saveTimers[name]);
+  saveTimers[name] = setTimeout(async () => {
+    try {
+      const r = await fetch(`api/${name}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+      if (!r.ok) throw new Error(r.status);
+      $('#saveState').textContent = 'Saved ✓';
+    } catch {
+      $('#saveState').textContent = 'Not saved: the edit server isn’t running';
+    }
+  }, 500);
+}
+if (EDIT) {
+  document.body.classList.add('editing');
+  document.body.insertAdjacentHTML('beforeend', '<div class="edit-bar">Edit mode · tap any text to change it · <b id="saveState">Changes save automatically</b></div>');
+}
+
+/* ---------- start ---------- */
+(async () => {
+  if (!LOCKED) {
+    renderLetter(); renderGift();
+    fetch('story.json', { cache: 'no-store' }).then(r => r.json())
+      .then(data => { cards = data; renderStory(); if (current >= 1) preloadPhotos(); })
+      .catch(() => { story.innerHTML = ''; });
+  } else if (saved.page > 0 && saved.k) {          // she unlocked it before on this phone
+    try { await useKey(b64(saved.k)); savedKey = saved.k; await revealContent(); } catch { saved.page = 0; }
+  } else saved.page = 0;
+  if (EDIT) return go(FLOW.indexOf('p-story'));
+  go(Math.min(saved.page || 0, FLOW.length - 1));
+  if (saved.page > 0) showMusicButton();
+})();
+</script>
+</body>
+</html>
