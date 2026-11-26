@@ -262,7 +262,7 @@ h1,h2,.instruction,.card .cap{text-wrap:balance}
    All the personal content — edit here.
    ========================================================= */
 const CONFIG = {"name":"PangJung","date":"30 November 2026","song":"","question":"To open, answer: where did we first meet?","hints":["Not quite, my love. Try again.","Hint: think back to the very first time you saw me.","Hint: it starts with N…"],"since":"2024-11-30","ask":"Will you go on a date with me?","noLines":["No","Are you sure?","Really sure?","Think again","PangJung, please","I’ll be sad","Okay fine, bye"],"letter":[],"gift":{}};
-const LOCK = {"salt":"Jp80NBRiwja6lmSP61PJ3A==","iter":250000,"slots":["rNrLq1v6+Gn3E4rFrZRTpdUNFZMBdx5XQXxor2PFMzJVQ5IdN6K06JZQsdw2gKELcxWZUYKSJKfk3svu","hUcdb4KZaNv7sd+DAuWzZOTjq1pxSL4QrlU1GYCWRjDX2rQag4SY2VIkPq1eGGWi0d06mV0FuqeRe6pL","lMUpH3ksZAT5ZUxG86mLuYozPXbKVRYZml+ou5FxZdzHilpC1uK0rLkxIgkFYWg5pQcnchGf9FHltOhV"],"data":"d.bin","song":"s.bin"};
+const LOCK = {"salt":"db0IqEQiJIL7XFdaeoYNKQ==","iter":250000,"slots":["tdbr191UU/JOl6vE5FfwOrKaup1jguUb8t1AOUU72Yuo1DeXj/lYMEDgEFPu6rfFCXiaViN1siKULT+f","JlMp9UO4PZ+q7yP0z/S8G8Huk9/CXZ4eM5KuoSxRJ2f9Lr6abewQUEonS1AuJCGVlKfLvgLlVujW86Hq","j8FfhCB1qsNrYHbz6wDHqGqjdqI+JtGiDBxDZv8O+oJCwA9xEU+1PHaEz3lOuJIbwxDnGBW7QyOJhyIr"],"data":"d.bin?v=49d5e5cb","song":"s.bin?v=49d5e5cb"};
 
 
 /* ---------- helpers ---------- */
@@ -616,7 +616,8 @@ if (EDIT) {
       .then(data => { cards = data; renderStory(); if (current >= 1) preloadPhotos(); })
       .catch(() => { story.innerHTML = ''; });
   } else if (saved.page > 0 && saved.k) {          // she unlocked it before on this phone
-    try { await useKey(b64(saved.k)); savedKey = saved.k; await revealContent(); } catch { saved.page = 0; }
+    try { await useKey(b64(saved.k)); savedKey = saved.k; await revealContent(); }
+    catch { revealed = null; contentKey = null; savedKey = null; saved.page = 0; }   // page was updated since: ask for the answer again
   } else saved.page = 0;
   if (EDIT) return go(FLOW.indexOf('p-story'));
   go(Math.min(saved.page || 0, FLOW.length - 1));
