@@ -10,7 +10,7 @@ DTSTART:20261129T110000Z
 DTEND:20261129T133000Z
 SUMMARY:Dinner at Sushi Juban Takumi ♥
 LOCATION:Sushi Juban Takumi Ekkamai\, Bangkok
-DESCRIPTION:Omakase date night with MooYeng. Wear: something you love.
+DESCRIPTION:Omakase date night with MooYeng. Wear: something easy to slip a kimono over.
 BEGIN:VALARM
 TRIGGER:-PT2H
 ACTION:DISPLAY
